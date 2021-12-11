@@ -3,13 +3,11 @@
 require('headers.php');
 require('functions.php');
 
-//createUser(getDbconnect(), "maija", "mehiläinen", "maijam", "maijam");
 
-if(checkUser(getDbconnect(), "maijam", "maijam")){
-    $_SESSION["user"] = "maijam";
-    echo "oikein";
+if(checkUser(getDbconnect(), $username, $password)){
+    header("Location: index.php");
 }else{
-    echo "väärin";
+    echo "Salasana väärin";
 }
 
 ?>
