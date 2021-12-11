@@ -11,9 +11,8 @@ $password = filter_var($json->password, FILTER_SANITIZE_STRING);
 try {
     $dbcon = new PDO('mysql:host=localhost;dbname=n0vaan00', 'root', '');
     $dbcon->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-//avaa yhteyden
-    createTable($dbcon);
-//valitsee käyttäjätunnuksen
+
+//lisää tiedot
     $sql= "INSERT INTO user VALUES(?,?,?,?)";
 
     $prepared= $dbcon->prepare($sql);
