@@ -1,11 +1,33 @@
 <?php
 
+function changeData(PDO $dbcon, $username){
+    try {
+        $json = json_decode(file_get_contents('php://input'));
+    //sanitoi data
+        
+        $phone = filter_var($json->phone, FILTER_SANITIZE_STRING);
+        $email = filter_var($json->email, FILTER_SANITIZE_STRING);
+        
+    
+    //lisää tiedot molempiin tauluihin
+        $sql2= "INSERT INTO contact VALUES(?,?,?)";
+
+        $prepared2= $dbcon->prepare($sql2);
+
+        $prepared2->execute(array($username, $email, $phone));
+
+    }catch(PDOException $e) {
+        echo '<br>'.$e->getMessage();
+    }
+}
+
 function checkUser(PDO $dbcon, $username, $password){
-        try{
-            $json = json_decode(file_get_contents('php://input'));
+
         //sanitoi data
-            $username = filter_var($json->username, FILTER_SANITIZE_STRING);
-            $password = filter_var($json->password, FILTER_SANITIZE_STRING);
+            $username = filter_var($username, FILTER_SANITIZE_STRING);
+            $password = filter_var($password, FILTER_SANITIZE_STRING);
+    
+    try{
         //tarkista käyttäjän syöttämät tiedot
             $sql = "SELECT password FROM user WHERE username=?";
             $prepare = $dbcon->prepare($sql);
@@ -16,12 +38,13 @@ function checkUser(PDO $dbcon, $username, $password){
             foreach($rows as $row){
                 $pw = $row["password"];
                 if(password_verify($password, $pw)){
-                    return true;
+                 return true;
                 }
             }        
             return false;
             
         }catch(PDOException $e) {
+            session_start();
             echo '<br>'.$e->getMessage();
         }
 }
@@ -65,7 +88,7 @@ function getDbconnect(){
     return $dbcon;
 }
 
-function createTable($dbcon){
+function createTable(PDO $dbcon){
         $sql = "CREATE TABLE IF NOT EXISTS user(
             firstname varchar(50) NOT NULL,
             lastname varchar(50) NOT NULL,
@@ -73,27 +96,22 @@ function createTable($dbcon){
             password varchar(200) NOT NULL,
             PRIMARY KEY (username)
             )";
-        $sql2 = "CREATE TABLE IF NOT EXISTS contact (
-            username varchar(50) NOT NULL,
-            email varchar(100),
-            phone varchar(20),
-            FOREIGN KEY (username)
-            )";
+
 
         $sql_add = "INSERT IGNORE INTO user VALUES ('Anu', 'Väyrynen', 'anuvay', 'anuvay')"; 
         
         $dbcon->exec($sql);
         $dbcon->exec($sql_add);
 }
-function createTable2($dbcon){
+function createTable2(PDO $dbcon){
     $sql2 = "CREATE TABLE IF NOT EXISTS contact (
         username varchar(50) NOT NULL,
         email varchar(100),
         phone varchar(20),
-        FOREIGN KEY (username)
+        FOREIGN KEY (username) REFERENCES user(username)
         )";
 
-    $sql_add2 = "INSERT INTO contact VALUES ('n0vaan00@students.oamk.fi', '050 123 456 78')";
+    $sql_add2 = "INSERT INTO contact VALUES ('anuvay', 'n0vaan00@students.oamk.fi', '050 123 456 78');";
     
     $dbcon->exec($sql2);
     $dbcon->exec($sql_add2);
